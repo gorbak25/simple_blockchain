@@ -7,11 +7,11 @@ defmodule WalletAccount do
   defstruct [:pub_key, :priv_key]
 
   @doc """
-  Transfers ammount of funds from account to dest leaving fee to the miner as the transaction fee.
+  Transfers amount of funds from account to dest leaving fee to the miner as the transaction fee.
   Returns {:ok, :registered} if the new transaction was succesfully registered
   returns {:error, reason} otherwise
   """
-  def transfer(account, dest, ammount, fee) do
+  def transfer(account, dest, amount, fee) do
     # TODO: prompt user for corfirmation
 
     %WalletAccount{pub_key: pub, priv_key: priv} = account
@@ -21,7 +21,7 @@ defmodule WalletAccount do
     body = %TransactionBody{
       from: pub,
       to: dest,
-      ammount: ammount,
+      amount: amount,
       nonce: nonce,
       transaction_fee: fee
     }
@@ -34,7 +34,7 @@ defmodule WalletAccount do
            body: body,
            signature: signature
          }) do
-      {:error, :invalid_nonce} -> transfer(account, dest, ammount, fee)
+      {:error, :invalid_nonce} -> transfer(account, dest, amount, fee)
       a -> a
     end
   end
@@ -173,21 +173,21 @@ defmodule Wallet do
 
   @doc """
   Creates a transfer from account with id num_from to account with id num_to.
-  The transfer will be for ammount tokens with a specified transaction fee 
+  The transfer will be for amount tokens with a specified transaction fee 
   """
-  def transfer_between_my_accounts(num_from, num_to, ammount, fee \\ 100) do
+  def transfer_between_my_accounts(num_from, num_to, amount, fee \\ 100) do
     apply_for_account_num(num_to, fn %WalletAccount{pub_key: pub} ->
-      transfer_funds(num_from, pub, ammount, fee)
+      transfer_funds(num_from, pub, amount, fee)
     end)
   end
 
   @doc """
   Creates a transfer from account with id num_from to account with public key dest.
-  The transfer will be for ammount tokens with a specified transaction fee 
+  The transfer will be for amount tokens with a specified transaction fee 
   """
-  def transfer_funds(num, dest, ammount, fee \\ 100) do
+  def transfer_funds(num, dest, amount, fee \\ 100) do
     apply_for_account_num(num, fn from ->
-      WalletAccount.transfer(from, dest, ammount, fee)
+      WalletAccount.transfer(from, dest, amount, fee)
     end)
   end
 

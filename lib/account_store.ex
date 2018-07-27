@@ -3,7 +3,7 @@ defmodule Account do
   Documentation for Account.
   This structure contains the account metadata.
   """
-  defstruct ammount: 0, spend_nonces: MapSet.new()
+  defstruct amount: 0, spend_nonces: MapSet.new()
 end
 
 defmodule AccountStore do
@@ -36,7 +36,7 @@ defmodule AccountStore do
   def get_available_funds(pub_key) do
     case get_account(pub_key) do
       nil -> 0
-      %Account{ammount: ammount} -> ammount
+      %Account{amount: amount} -> amount
     end
   end
 
@@ -64,13 +64,13 @@ defmodule AccountStore do
   Returns {:error, :reason} if the data is invalid
   """
   def verify_transaction_body(transaction_body) do
-    if transaction_body.ammount <= 0 or transaction_body.transaction_fee < 0 do
-      {:error, :invalid_ammount}
+    if transaction_body.amount <= 0 or transaction_body.transaction_fee < 0 do
+      {:error, :invalid_amount}
     else
       case get_account(transaction_body.from) do
-        %Account{ammount: ammount, spend_nonces: nonces} ->
+        %Account{amount: amount, spend_nonces: nonces} ->
           cond do
-            transaction_body.ammount + transaction_body.transaction_fee > ammount ->
+            transaction_body.amount + transaction_body.transaction_fee > amount ->
               {:error, :insufficient_funds}
 
             MapSet.member?(nonces, transaction_body.nonce) ->
@@ -91,7 +91,7 @@ defmodule AccountStore do
   """
   def reward_miner(miner_pub_key, value) do
     update_account(miner_pub_key, fn account ->
-      %Account{account | ammount: account.ammount + value}
+      %Account{account | amount: account.amount + value}
     end)
   end
 
@@ -103,18 +103,18 @@ defmodule AccountStore do
     update_account(transaction_body.from, fn account ->
       %Account{
         account
-        | ammount: account.ammount - transaction_body.ammount - transaction_body.transaction_fee,
+        | amount: account.amount - transaction_body.amount - transaction_body.transaction_fee,
           spend_nonces: MapSet.put(account.spend_nonces, transaction_body.nonce)
       }
     end)
 
     update_account(transaction_body.to, fn account ->
-      %Account{account | ammount: account.ammount + transaction_body.ammount}
+      %Account{account | amount: account.amount + transaction_body.amount}
     end)
 
     if transaction_body.transaction_fee > 0 do
       update_account(miner_pub_key, fn account ->
-        %Account{account | ammount: account.ammount + transaction_body.transaction_fee}
+        %Account{account | amount: account.amount + transaction_body.transaction_fee}
       end)
     end
   end

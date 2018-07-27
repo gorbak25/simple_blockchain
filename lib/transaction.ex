@@ -7,7 +7,7 @@ defmodule TransactionBody do
   defstruct [
     :from,
     :to,
-    :ammount,
+    :amount,
     # not specified in the specification but necessary in order to avoid replay attacks. What would stop Bob from resubmiting valid transactions?
     :nonce,
     # let's get fancy
@@ -19,7 +19,7 @@ defmodule TransactionBody do
   """
   def serialize(body) do
     body.from <>
-      body.to <> <<body.ammount::64>> <> <<body.nonce::64>> <> <<body.transaction_fee::64>>
+      body.to <> <<body.amount::64>> <> <<body.nonce::64>> <> <<body.transaction_fee::64>>
   end
 
   @doc """
@@ -29,7 +29,7 @@ defmodule TransactionBody do
     <<
       from::520,
       to::520,
-      ammount::64,
+      amount::64,
       nonce::64,
       transaction_fee::64,
       rest::bitstring
@@ -39,7 +39,7 @@ defmodule TransactionBody do
       %TransactionBody{
         from: <<from::520>>,
         to: <<to::520>>,
-        ammount: ammount,
+        amount: amount,
         nonce: nonce,
         transaction_fee: transaction_fee
       },
